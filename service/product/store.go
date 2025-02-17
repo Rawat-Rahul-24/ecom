@@ -2,6 +2,7 @@ package product
 
 import (
 	"database/sql"
+	"fmt"
 
 	"ecom/types"
 )
@@ -66,6 +67,45 @@ func (s *Store) GetProductById(id int) (*types.Product, error) {
 
 	return p, err
 
+}
+
+func (s *Store) GetProductByIds(ids []int) ([]types.Product, error) {
+	query := fmt.Sprintf("SELECT * FROM products WHERE id IN (?%s)", ids)
+
+	//convert productIds to []interface
+	args := make([]interface{}, len(ids))
+	for i,v := range ids {
+		args[i] = v
+	}
+
+	rows, err := s.db.Query(query, args...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	products := []types.Product{}
+
+	for rows.Next() {
+		p, err := scanRowsIntoProducts(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, *p)
+	}
+
+	return products, nil
+}
+
+func (s *Store) UpdateProduct(product types.Product) error {
+	_, err := s.db.Exec("UPDATE products SET quantity = ? WHERE id = ?", product.Quantity, product.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func scanRowsIntoProducts(rows *sql.Rows) (*types.Product, error) {

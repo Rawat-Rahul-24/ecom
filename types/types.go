@@ -43,12 +43,46 @@ type ProductStore interface {
 	GetProducts() ([]Product, error)
 	CreateProduct(Product) error
 	GetProductById(id int) (*Product, error)
+	GetProductByIds(ids []int) ([]Product, error)
+	UpdateProduct(Product) error
 }
 
 type CreateProductPayload struct {
-	Name string `json:"name" validate:"required"`
-	Description string `json:"description" validate:"required"`
-	Quantity int `json:"quantity" validate:"required"`
-	Price float64 `json:"price" validate:"required"`
-	Image string `json:"image" validate:"required"`
+	Name        string  `json:"name" validate:"required"`
+	Description string  `json:"description" validate:"required"`
+	Quantity    int     `json:"quantity" validate:"required"`
+	Price       float64 `json:"price" validate:"required"`
+	Image       string  `json:"image" validate:"required"`
+}
+
+type OrderStore interface {
+	CreateOrder(Order) (int, error)
+	CreateOrderItem(OrderItem) error
+}
+
+type Order struct {
+	ID        int       `json:"id"`
+	UserID    int       `json:"userId"`
+	Total     float64   `json:"total"`
+	Status    string    `json:"status"`
+	Address   string    `json:"address"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type OrderItem struct {
+	ID        int       `json:"id"`
+	OrderID   int       `json:"orderId"`
+	ProductId int       `json:"productId"`
+	Price     float64   `json:"price"`
+	Quantity  int       `json:"quantity"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type CartItem struct {
+	ProductID int `json:"productId"`
+	Quantity  int `json:"quantity"`
+}
+
+type CartCheckoutPayload struct {
+	Items []CartItem `json:"items" validate:"required"`
 }
